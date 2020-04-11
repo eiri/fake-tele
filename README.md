@@ -22,9 +22,13 @@ $ rebar3 shell --apps fmqttc
 1> l(fmqttc).
 {module,fmqttc}
 
-2> fmqttc:start_child(a).
-2020-04-11T19:29:22.501278-03:00 notice: fmqttc_client (a) child is up
-{ok,<0.153.0>}
+2> {ok, Pid} = fmqttc:start_child(a).
+2020-04-11T19:39:44.974147-03:00 notice: fmqttc_client (a) child is up
+{ok,<0.154.0>}
+
+3> fmqttc:stop_child(Pid).
+2020-04-11T19:40:01.760324-03:00 notice: fmqttc_client child is down
+ok
 ```
 
 ## License

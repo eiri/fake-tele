@@ -22,6 +22,7 @@ start_link(Args) ->
 %% gen_server callbacks
 
 init([Args]) ->
+    process_flag(trap_exit, true),
     error_logger:info_msg("~p (~p) child is up", [?MODULE, Args]),
     {ok, #{}}.
 
