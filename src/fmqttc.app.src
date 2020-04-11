@@ -1,0 +1,16 @@
+{application, fmqttc, [
+    {description, "Fake MQTT telemetry network"},
+    {vsn, "0.1.0"},
+    {modules, [
+        fmqttc,
+        fmqttc_client
+    ]},
+    {registered, [fmqttc]},
+    {applications, [
+        kernel,
+        stdlib,
+        crypto,
+        sasl
+    ]},
+    {mod, {fmqttc, []}}
+]}.

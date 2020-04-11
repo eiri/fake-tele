@@ -1,2 +1,32 @@
-# fake-tele
-Fake telemetry MQTT client
+# Fake tele
+_A fake telemetry MQTT client_
+
+## Description and motivation
+
+This is an erlang app that creates a network of MQTT clients reporting randomly generated telemetry to a broker. The clients can randomly appear, quit, crash or re-join.
+
+The propose of the app is to simulate traffic for testing of a MQTT broker.
+
+## Build
+
+```
+$ brew install rebar3
+$ rebar3 compile
+```
+
+## Run
+
+```
+$ rebar3 shell --apps fmqttc
+
+1> l(fmqttc).
+{module,fmqttc}
+
+2> fmqttc:start_child(a).
+2020-04-11T19:29:22.501278-03:00 notice: fmqttc_client (a) child is up
+{ok,<0.153.0>}
+```
+
+## License
+
+[MIT](https://github.com/eiri/fake-tele/blob/master/LICENSE)
