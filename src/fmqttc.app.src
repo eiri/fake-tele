@@ -4,15 +4,17 @@
     {modules, [
         fmqttc,
         fmqttc_manager,
+        fmqttc_monitor,
         fmqttc_client_sup,
         fmqttc_client
     ]},
-    {registered, [fmqttc, fmqttc_manager, fmqttc_client_sup]},
+    {registered, [fmqttc, fmqttc_manager, fmqttc_monitor, fmqttc_client_sup]},
     {applications, [
         kernel,
         stdlib,
         crypto,
-        sasl
+        sasl,
+        emqtt
     ]},
     {mod, {fmqttc, []}}
 ]}.

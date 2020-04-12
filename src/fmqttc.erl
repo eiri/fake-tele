@@ -43,6 +43,10 @@ init([]) ->
         #{
             id => fmqttc_manager,
             start => {fmqttc_manager, start_link, []}
+        },
+        #{
+            id => fmqttc_monitor,
+            start => {fmqttc_monitor, start_link, []}
         }
     ],
     {ok, {#{}, Children}}.

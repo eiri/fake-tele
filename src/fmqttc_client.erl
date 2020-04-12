@@ -13,9 +13,6 @@
 ]).
 
 
--define(C, unicode:characters_to_binary("°")).
-
-
 start_link(Ctx) ->
     gen_server:start_link(?MODULE, [Ctx], []).
 
