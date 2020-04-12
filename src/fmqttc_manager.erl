@@ -30,7 +30,12 @@ handle_cast({start, ClientsNum}, Ctx) ->
     error_logger:info_msg("~p starting ~b clients", [?MODULE, ClientsNum]),
     NewCtx = lists:foldl(fun(_N, Acc) ->
         Name = name(),
-        ClientCtx = #{name => Name, temp => rand:normal(0, 5)},
+        ClientCtx = #{
+            name => Name,
+            temp => rand:normal(0, 5),
+            interval => 800 + rand:uniform(400),
+            trend => fun(T) -> {ok, rand:normal(T, 1)} end
+        },
         {ok, Pid} = fmqttc:start_client(ClientCtx),
         dict:store(Name, ClientCtx#{pid => Pid}, Acc)
     end, Ctx, lists:seq(1, ClientsNum)),

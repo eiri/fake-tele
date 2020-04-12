@@ -30,12 +30,12 @@ init([#{name := Name} = Ctx]) ->
 handle_call(_, _, Ctx) ->
     {stop, unknown_call, Ctx}.
 
-handle_cast(publish, #{name := Name, temp := Temp} = Ctx) ->
+handle_cast(publish, #{name := Name, temp := Temp, interval := Int} = Ctx) ->
     error_logger:info_msg("~s temp ~.2f~ts", [Name, Temp, ?C]),
-    {noreply, Ctx, 1000}.
+    {noreply, Ctx, Int}.
 
-handle_info(timeout, #{temp := Temp0} = Ctx) ->
-    Temp = rand:normal(Temp0, 1),
+handle_info(timeout, #{temp := Temp0, trend := T} = Ctx) ->
+    {ok, Temp} = T(Temp0),
     gen_server:cast(self(), publish),
     {noreply, Ctx#{temp := Temp}}.
 
