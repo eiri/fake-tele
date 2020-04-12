@@ -16,47 +16,69 @@ $ rebar3 compile
 
 ## Run
 
+### Start server
+
+_This assumes that docker is available, up and running_
+
 ```
-$ rebar3 shell --apps fmqttc
+$ make server-start
+docker run --name mosquitto --rm -d -p 1883:1883 -p 9001:9001 -v mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf eclipse-mosquitto:1.6
+b0921b11f3457c4948702c86014e5834b399c2208a5f017fc33a1c1e29c6c4b1
+
+$ make server-logs
+docker logs -f mosquitto
+2020-04-12T16:20:38: mosquitto version 1.6.9 starting
+2020-04-12T16:20:38: Config loaded from /mosquitto/config/mosquitto.conf.
+2020-04-12T16:20:38: Opening ipv4 listen socket on port 1883.
+2020-04-12T16:20:38: Opening ipv6 listen socket on port 1883.
+```
+
+### Start client
+
+```
+$ make run
+rebar3 shell --apps=fmqttc
 ===> Verifying dependencies...
 ===> Compiling fmqttc
 Erlang/OTP 22 [erts-10.7.1] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [hipe] [dtrace]
 
 Eshell V10.7.1  (abort with ^G)
 1> ===> The rebar3 shell is a development tool; to deploy applications in production, consider using releases (http://www.rebar3.org/docs/releases)
-2020-04-11T22:18:10.053794-03:00 notice: fmqttc_manager is up
-2020-04-11T22:18:10.097484-03:00 notice: fmqttc_manager starting 7 clients
+2020-04-12T13:20:49.255756-03:00 notice: fmqttc_manager is up
+2020-04-12T13:20:49.305957-03:00 notice: fmqttc_manager starting 5 clients
 ===> Booted sasl
 ===> Booted fmqttc
-2020-04-11T22:18:10.098731-03:00 notice: fmqttc_client a6b0349dbb281059 is up
-2020-04-11T22:18:10.098867-03:00 notice: a6b0349dbb281059 temp 0.28°
-2020-04-11T22:18:10.099170-03:00 notice: fmqttc_client a0212d5e5c29e49d is up
-2020-04-11T22:18:10.099333-03:00 notice: a0212d5e5c29e49d temp -1.07°
-2020-04-11T22:18:10.099418-03:00 notice: fmqttc_client 51f069ea0fc42790 is up
-2020-04-11T22:18:10.099549-03:00 notice: 51f069ea0fc42790 temp 0.24°
-2020-04-11T22:18:10.099759-03:00 notice: fmqttc_client 915dc066b6a77140 is up
-2020-04-11T22:18:10.099916-03:00 notice: 915dc066b6a77140 temp -1.64°
-2020-04-11T22:18:10.100106-03:00 notice: fmqttc_client a11d8a4bbeb6ab40 is up
-2020-04-11T22:18:10.100254-03:00 notice: a11d8a4bbeb6ab40 temp 1.40°
-2020-04-11T22:18:10.100345-03:00 notice: fmqttc_client d52c727bf64d8189 is up
-2020-04-11T22:18:10.100443-03:00 notice: d52c727bf64d8189 temp 1.83°
-2020-04-11T22:18:10.100671-03:00 notice: fmqttc_client f1fd7e37bf0d7198 is up
-2020-04-11T22:18:10.100800-03:00 notice: f1fd7e37bf0d7198 temp 0.97°
-2020-04-11T22:18:11.099483-03:00 notice: a6b0349dbb281059 temp 2.57°
-2020-04-11T22:18:11.100181-03:00 notice: 51f069ea0fc42790 temp -1.19°
-2020-04-11T22:18:11.100366-03:00 notice: 915dc066b6a77140 temp -2.40°
-2020-04-11T22:18:11.100181-03:00 notice: a0212d5e5c29e49d temp -0.29°
-2020-04-11T22:18:11.101211-03:00 notice: a11d8a4bbeb6ab40 temp 2.09°
-2020-04-11T22:18:11.101211-03:00 notice: d52c727bf64d8189 temp 1.65°
-2020-04-11T22:18:11.101370-03:00 notice: f1fd7e37bf0d7198 temp -0.94°
-2020-04-11T22:18:12.100230-03:00 notice: a6b0349dbb281059 temp 0.59°
-2020-04-11T22:18:12.101294-03:00 notice: 915dc066b6a77140 temp -2.75°
-2020-04-11T22:18:12.101295-03:00 notice: 51f069ea0fc42790 temp -0.45°
-2020-04-11T22:18:12.101503-03:00 notice: a0212d5e5c29e49d temp -0.56°
-2020-04-11T22:18:12.102352-03:00 notice: f1fd7e37bf0d7198 temp 1.30°
-2020-04-11T22:18:12.102352-03:00 notice: a11d8a4bbeb6ab40 temp 4.08°
-2020-04-11T22:18:12.102523-03:00 notice: d52c727bf64d8189 temp 2.27°
+2020-04-12T13:20:49.307639-03:00 notice: fmqttc_client 5f5d38498dcf98df is up
+2020-04-12T13:20:49.308084-03:00 notice: fmqttc_client 353fdc0f419d0c03 is up
+2020-04-12T13:20:49.308493-03:00 notice: fmqttc_client 3e7b1fbcd6ab5bc is up
+2020-04-12T13:20:49.308834-03:00 notice: fmqttc_client 37ea3a43b96935a is up
+2020-04-12T13:20:49.309132-03:00 notice: fmqttc_client 8b95e906ff489774 is up
+make: *** [run] Interrupt: 2
+```
 
+### Check server logs, stop server
+
+```
+2020-04-12T16:20:49: New connection from 172.17.0.1 on port 1883.
+2020-04-12T16:20:49: New connection from 172.17.0.1 on port 1883.
+2020-04-12T16:20:49: New connection from 172.17.0.1 on port 1883.
+2020-04-12T16:20:49: New connection from 172.17.0.1 on port 1883.
+2020-04-12T16:20:49: New connection from 172.17.0.1 on port 1883.
+2020-04-12T16:20:49: New client connected from 172.17.0.1 as 5f5d38498dcf98df (p2, c1, k60).
+2020-04-12T16:20:49: New client connected from 172.17.0.1 as 8b95e906ff489774 (p2, c1, k60).
+2020-04-12T16:20:49: New client connected from 172.17.0.1 as 3e7b1fbcd6ab5bc (p2, c1, k60).
+2020-04-12T16:20:49: New client connected from 172.17.0.1 as 37ea3a43b96935a (p2, c1, k60).
+2020-04-12T16:20:49: New client connected from 172.17.0.1 as 353fdc0f419d0c03 (p2, c1, k60).
+2020-04-12T16:20:52: Socket error on client 3e7b1fbcd6ab5bc, disconnecting.
+2020-04-12T16:20:52: Socket error on client 37ea3a43b96935a, disconnecting.
+2020-04-12T16:20:52: Socket error on client 5f5d38498dcf98df, disconnecting.
+2020-04-12T16:20:52: Socket error on client 353fdc0f419d0c03, disconnecting.
+2020-04-12T16:20:52: Socket error on client 8b95e906ff489774, disconnecting.
+c^Cmake: *** [server-logs] Interrupt: 2
+
+$ make server-stop
+docker stop mosquitto
+mosquitto
 ```
 
 ## License

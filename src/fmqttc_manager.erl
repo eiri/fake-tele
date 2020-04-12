@@ -28,10 +28,13 @@ handle_call(_, _, Ctx) ->
 
 handle_cast({start, ClientsNum}, Ctx) ->
     error_logger:info_msg("~p starting ~b clients", [?MODULE, ClientsNum]),
-    NewCtx = lists:foldl(fun(_N, Acc) ->
+    NewCtx = lists:foldl(fun(N, Acc) ->
         Name = name(),
+        Topic = <<"valve/", (integer_to_binary(N))/binary>>,
         ClientCtx = #{
             name => Name,
+            topic => Topic,
+            qos => 1,
             temp => rand:normal(0, 5),
             interval => 800 + rand:uniform(400),
             trend => trend()
