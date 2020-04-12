@@ -3,11 +3,20 @@
 -behaviour(application).
 -behaviour(supervisor).
 
+%% public API
+-export([start_client/1]).
+
 %% application callbacks
 -export([start/2, stop/1]).
 
 %% supervisor callbacks
--export([start_link/0, start_child/1, stop_child/1, init/1]).
+-export([start_link/0, init/1]).
+
+
+%% Public API
+
+start_client(Ctx) ->
+    fmqttc_client_sup:start_child(Ctx).
 
 
 %% application callbacks
@@ -27,8 +36,8 @@ start_link() ->
 init([]) ->
     Children = [
         #{
-            id => fmqttc_worker_sup,
-            start => {fmqttc_worker_sup, start_link, []},
+            id => fmqttc_client_sup,
+            start => {fmqttc_client_sup, start_link, []},
             type => supervisor
         },
         #{

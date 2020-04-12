@@ -25,7 +25,7 @@ handle_call(_, _, Ctx) ->
     {stop, unknown_call, Ctx}.
 
 handle_cast(start, Ctx) ->
-    fmqttc_worker_sup:start_child(1),
+    fmqttc:start_client(1),
     {noreply, Ctx};
 handle_cast(_, Ctx) ->
     {stop, unknown_cast, Ctx}.

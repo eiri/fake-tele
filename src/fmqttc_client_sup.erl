@@ -1,4 +1,4 @@
--module(fmqttc_worker_sup).
+-module(fmqttc_client_sup).
 
 -behaviour(supervisor).
 
@@ -21,8 +21,8 @@ init([]) ->
         period => 1
     },
     Child = #{
-        id => fmqttc_worker,
-        start => {fmqttc_worker, start_link, []},
+        id => fmqttc_client,
+        start => {fmqttc_client, start_link, []},
         restart => transient,
         shutdown => 1
     },

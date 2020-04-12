@@ -4,10 +4,10 @@
     {modules, [
         fmqttc,
         fmqttc_manager,
-        fmqttc_worker_sup,
-        fmqttc_worker
+        fmqttc_client_sup,
+        fmqttc_client
     ]},
-    {registered, [fmqttc, fmqttc_manager, fmqttc_worker_sup]},
+    {registered, [fmqttc, fmqttc_manager, fmqttc_client_sup]},
     {applications, [
         kernel,
         stdlib,

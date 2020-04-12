@@ -1,4 +1,4 @@
--module(fmqttc_worker).
+-module(fmqttc_client).
 
 -behaviour(gen_server).
 
