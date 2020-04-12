@@ -34,7 +34,7 @@ handle_cast({start, ClientsNum}, Ctx) ->
             name => Name,
             temp => rand:normal(0, 5),
             interval => 800 + rand:uniform(400),
-            trend => fun(T) -> {ok, rand:normal(T, 1)} end
+            trend => trend()
         },
         {ok, Pid} = fmqttc:start_client(ClientCtx),
         dict:store(Name, ClientCtx#{pid => Pid}, Acc)
@@ -50,3 +50,11 @@ handle_info(_, Ctx) ->
 name() ->
     <<I:64>> = crypto:strong_rand_bytes(8),
     iolist_to_binary(io_lib:format("~.16b", [I])).
+
+trend() ->
+    trend(random).
+
+trend(random) ->
+    fun(T) ->
+        {ok, rand:normal(T, 1)}
+    end.
