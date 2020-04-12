@@ -18,17 +18,17 @@ $ rebar3 compile
 
 ```
 $ rebar3 shell --apps fmqttc
+===> Verifying dependencies...
+===> Compiling fmqttc
+Erlang/OTP 22 [erts-10.7.1] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [hipe] [dtrace]
 
-1> l(fmqttc).
-{module,fmqttc}
+Eshell V10.7.1  (abort with ^G)
+1> ===> The rebar3 shell is a development tool; to deploy applications in production, consider using releases (http://www.rebar3.org/docs/releases)
+===> Booted sasl
+2020-04-11T21:08:02.198797-03:00 notice: fmqttc_manager is up
+===> Booted fmqttc
+2020-04-11T21:08:02.220964-03:00 notice: fmqttc_worker (1) child is up
 
-2> {ok, Pid} = fmqttc:start_child(a).
-2020-04-11T19:39:44.974147-03:00 notice: fmqttc_client (a) child is up
-{ok,<0.154.0>}
-
-3> fmqttc:stop_child(Pid).
-2020-04-11T19:40:01.760324-03:00 notice: fmqttc_client child is down
-ok
 ```
 
 ## License

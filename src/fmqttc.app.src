@@ -3,9 +3,11 @@
     {vsn, "0.1.0"},
     {modules, [
         fmqttc,
-        fmqttc_client
+        fmqttc_manager,
+        fmqttc_worker_sup,
+        fmqttc_worker
     ]},
-    {registered, [fmqttc]},
+    {registered, [fmqttc, fmqttc_manager, fmqttc_worker_sup]},
     {applications, [
         kernel,
         stdlib,

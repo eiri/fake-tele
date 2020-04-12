@@ -24,22 +24,16 @@ stop(_State) ->
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-start_child(Args) ->
-    supervisor:start_child(?MODULE, [Args]).
-
-stop_child(Pid) ->
-    supervisor:terminate_child(?MODULE, Pid).
-
 init([]) ->
-    Strategy = #{
-        strategy => simple_one_for_one,
-        intensity => 0,
-        period => 1
-    },
-    Child = #{
-        id => fmqttc_client,
-        start => {fmqttc_client, start_link, []},
-        restart => transient,
-        shutdown => 1
-    },
-    {ok, {Strategy, [Child]}}.
+    Children = [
+        #{
+            id => fmqttc_worker_sup,
+            start => {fmqttc_worker_sup, start_link, []},
+            type => supervisor
+        },
+        #{
+            id => fmqttc_manager,
+            start => {fmqttc_manager, start_link, []}
+        }
+    ],
+    {ok, {#{}, Children}}.
