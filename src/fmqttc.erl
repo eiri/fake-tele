@@ -15,7 +15,7 @@
 
 %% Public API
 
-start_client(Ctx) ->
+start_client(#{} = Ctx) ->
     fmqttc_client_sup:start_child(Ctx).
 
 

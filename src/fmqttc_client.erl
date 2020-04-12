@@ -13,24 +13,32 @@
 ]).
 
 
-start_link(Args) ->
-    gen_server:start_link(?MODULE, [Args], []).
+-define(C, unicode:characters_to_binary("°")).
 
 
-init([Args]) ->
+start_link(Ctx) ->
+    gen_server:start_link(?MODULE, [Ctx], []).
+
+
+init([#{name := Name} = Ctx]) ->
     process_flag(trap_exit, true),
-    error_logger:info_msg("~p (~p) child is up", [?MODULE, Args]),
-    {ok, #{}}.
+    error_logger:info_msg("~s ~s is up", [?MODULE, Name]),
+    _ = crypto:rand_seed(),
+    gen_server:cast(self(), publish),
+    {ok, Ctx}.
 
 handle_call(_, _, Ctx) ->
     {stop, unknown_call, Ctx}.
 
-handle_cast(_, Ctx) ->
-    {stop, unknown_cast, Ctx}.
+handle_cast(publish, #{name := Name, temp := Temp} = Ctx) ->
+    error_logger:info_msg("~s temp ~.2f~ts", [Name, Temp, ?C]),
+    {noreply, Ctx, 1000}.
 
-handle_info(_, Ctx) ->
-    {stop, unknown_info, Ctx}.
+handle_info(timeout, #{temp := Temp0} = Ctx) ->
+    Temp = rand:normal(Temp0, 1),
+    gen_server:cast(self(), publish),
+    {noreply, Ctx#{temp := Temp}}.
 
-terminate(_Reason, _Ctx) ->
-    error_logger:info_msg("~p child is down", [?MODULE]),
+terminate(_Reason, #{name := Name}) ->
+    error_logger:info_msg("~s ~s is down", [?MODULE, Name]),
     ok.
