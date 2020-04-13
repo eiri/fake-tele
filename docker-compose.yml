@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:1.6
+    container_name: mosquitto
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - ./infra/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  influxdb:
+    image: influxdb:1.7
+    container_name: influxdb
+    ports:
+      - 8086:8086
+    volumes:
+      - ./infra/influxdb:/var/lib/influxdb
+
+  grafana:
+    image: grafana/grafana:5.4.3
+    container_name: grafana
+    depends_on:
+      - influxdb
+    ports:
+      - 3000:3000
+    volumes:
+      - ./infra/grafana:/var/lib/grafana
