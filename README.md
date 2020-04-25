@@ -3,7 +3,7 @@ _A fake telemetry MQTT client_
 
 ## Description and motivation
 
-This is an erlang app that creates a network of MQTT clients reporting randomly generated telemetry to a broker. The clients can randomly appear, quit, crash or re-join.
+This is an erlang app that creates a network of MQTT clients reporting randomly generated telemetry to a broker.
 
 The propose of the app is to simulate traffic for testing of a MQTT broker.
 
