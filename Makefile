@@ -24,3 +24,7 @@ server-logs:
 .PHONY: server-stop
 server-stop:
 	docker-compose down
+
+.PHONY: query-influx
+query-influx:
+	curl -q -H 'Accept: application/csv' -G 'http://localhost:8086/query?db=fake-tele' --data-urlencode 'q=SELECT * FROM device GROUP BY topic ORDER BY time DESC LIMIT 10'

@@ -31,11 +31,12 @@ Creating grafana   ... done
 
 $ make server-logs
 docker-compose logs -f mosquitto
+docker-compose logs -f mosquitto
 Attaching to mosquitto
-mosquitto    | 2020-04-13T00:19:23: mosquitto version 1.6.9 starting
-mosquitto    | 2020-04-13T00:19:23: Config loaded from /mosquitto/config/mosquitto.conf.
-mosquitto    | 2020-04-13T00:19:23: Opening ipv4 listen socket on port 1883.
-mosquitto    | 2020-04-13T00:19:23: Opening ipv6 listen socket on port 1883.
+mosquitto    | 2020-04-25T18:19:15: mosquitto version 1.6.9 starting
+mosquitto    | 2020-04-25T18:19:15: Config loaded from /mosquitto/config/mosquitto.conf.
+mosquitto    | 2020-04-25T18:19:15: Opening ipv4 listen socket on port 1883.
+mosquitto    | 2020-04-25T18:19:15: Opening ipv6 listen socket on port 1883.
 ```
 
 ### Start client
@@ -49,32 +50,60 @@ Erlang/OTP 22 [erts-10.7.1] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threa
 
 Eshell V10.7.1  (abort with ^G)
 1> ===> The rebar3 shell is a development tool; to deploy applications in production, consider using releases (http://www.rebar3.org/docs/releases)
-2020-04-12T21:20:24.675651-03:00 notice: fmqttc_manager is up
-2020-04-12T21:20:24.728720-03:00 notice: fmqttc_manager starting 1 clients
-2020-04-12T21:20:24.730597-03:00 notice: fmqttc_monitor is up
+2020-04-25T15:20:09.381384-03:00 notice: fmqttc_manager is up
+2020-04-25T15:20:09.427119-03:00 notice: fmqttc_manager starting 12 clients
+2020-04-25T15:20:09.430304-03:00 notice: fmqttc_monitor is up
 ===> Booted sasl
+===> Booted cowlib
+===> Booted gun
 ===> Booted emqtt
 ===> Booted fmqttc
-2020-04-12T21:20:24.732063-03:00 notice: fmqttc_client 71f7b4c56d0c1bda is up
-2020-04-12T21:20:25.886894-03:00 notice: valve/1 temp -0.85°
-2020-04-12T21:20:26.979647-03:00 notice: valve/1 temp -0.88°
-2020-04-12T21:20:28.073851-03:00 notice: valve/1 temp -0.97°
-2020-04-12T21:20:29.166302-03:00 notice: valve/1 temp -1.45°
-2020-04-12T21:20:30.259340-03:00 notice: valve/1 temp -1.92°
-make: *** [run] Interrupt: 2
+2020-04-25T15:20:09.431887-03:00 notice: fmqttc_client ffee974fe94dfe32 is up
+2020-04-25T15:20:09.432349-03:00 notice: fmqttc_client 389f9e8905e21811 is up
+2020-04-25T15:20:09.432988-03:00 notice: fmqttc_client 8f2e5995c7f6843e is up
+2020-04-25T15:20:09.433275-03:00 notice: fmqttc_client 6996cdde9a35523b is up
+2020-04-25T15:20:09.433651-03:00 notice: fmqttc_client 6a0002e73bc5cdad is up
+2020-04-25T15:20:09.433999-03:00 notice: fmqttc_client 5ae086e473d5b6ab is up
+2020-04-25T15:20:09.434335-03:00 notice: fmqttc_client 68af7a2b746e102e is up
+2020-04-25T15:20:09.434658-03:00 notice: fmqttc_client 33999f0612c1635 is up
+2020-04-25T15:20:09.434971-03:00 notice: fmqttc_client 4ccada6a999b51b4 is up
+2020-04-25T15:20:09.435618-03:00 notice: fmqttc_client 82a72eb96067cb1e is up
+2020-04-25T15:20:09.435880-03:00 notice: fmqttc_client f4824ef378ca5477 is up
+2020-04-25T15:20:09.436103-03:00 notice: fmqttc_client 24f9af266961eddf is up
+2020-04-25T15:20:09.533224-03:00 notice: fmqttc_monitor drop db fake-tele
+2020-04-25T15:20:09.590110-03:00 notice: fmqttc_monitor create db fake-tele
+2020-04-25T15:20:09.590314-03:00 notice: fmqttc_monitor subscribe to valve/#
+2020-04-25T15:20:10.426776-03:00 notice: valve/1 temp 2.77°
+2020-04-25T15:20:10.427194-03:00 notice: fmqttc_monitor store point device,topic=valve/1,type=valve,num=1 temperature=2.773579 1587838810426
+2020-04-25T15:20:10.529602-03:00 notice: valve/11 temp 0.59°
+2020-04-25T15:20:10.529970-03:00 notice: fmqttc_monitor store point device,topic=valve/11,type=valve,num=11 temperature=0.591063 1587838810529
+2020-04-25T15:20:10.571613-03:00 notice: valve/10 temp -0.84°
+2020-04-25T15:20:10.572106-03:00 notice: fmqttc_monitor store point device,topic=valve/10,type=valve,num=10 temperature=-0.836942 1587838810571
 ```
 
-### Check server logs, stop server
+### Check server logs
 
 ```
-mosquitto    | 2020-04-13T00:20:24: New connection from 172.20.0.1 on port 1883.
-mosquitto    | 2020-04-13T00:20:24: New connection from 172.20.0.1 on port 1883.
-mosquitto    | 2020-04-13T00:20:24: New client connected from 172.20.0.1 as monitor (p2, c1, k60).
-mosquitto    | 2020-04-13T00:20:24: New client connected from 172.20.0.1 as 71f7b4c56d0c1bda (p2, c1, k60).
-mosquitto    | 2020-04-13T00:20:30: Socket error on client monitor, disconnecting.
-mosquitto    | 2020-04-13T00:20:30: Socket error on client 71f7b4c56d0c1bda, disconnecting.
-^CERROR: Aborting.
-make: *** [server-logs] Error 1
+mosquitto    | 2020-04-25T18:20:09: New connection from 172.19.0.1 on port 1883.
+mosquitto    | 2020-04-25T18:20:09: New client connected from 172.19.0.1 as 4ccada6a999b51b4 (p2, c1, k60).
+mosquitto    | 2020-04-25T18:20:09: New client connected from 172.19.0.1 as ffee974fe94dfe32 (p2, c1, k60).
+mosquitto    | 2020-04-25T18:20:09: New client connected from 172.19.0.1 as 68af7a2b746e102e (p2, c1, k60).
+mosquitto    | 2020-04-25T18:20:09: New client connected from 172.19.0.1 as f4824ef378ca5477 (p2, c1, k60).
+mosquitto    | 2020-04-25T18:20:09: New client connected from 172.19.0.1 as 5ae086e473d5b6ab (p2, c1, k60).
+mosquitto    | 2020-04-25T18:20:09: New client connected from 172.19.0.1 as 8f2e5995c7f6843e (p2, c1, k60).
+mosquitto    | 2020-04-25T18:20:09: New client connected from 172.19.0.1 as 389f9e8905e21811 (p2, c1, k60).
+mosquitto    | 2020-04-25T18:20:09: New client connected from 172.19.0.1 as 6a0002e73bc5cdad (p2, c1, k60).
+mosquitto    | 2020-04-25T18:20:09: New client connected from 172.19.0.1 as 24f9af266961eddf (p2, c1, k60).
+mosquitto    | 2020-04-25T18:20:09: New client connected from 172.19.0.1 as 82a72eb96067cb1e (p2, c1, k60).
+```
+
+### Create grafana dashboard
+
+Go to http://localhost:3000. Login as admin:admin. Add data source InfluxDB with name "InfluxDB", url http://influxdb:8086 and database "fake-tele".
+
+Go to "Home", choose menu "Import dashboard" and upload or paste json `infra/grafana-dashboard.json`. Go to created dashboard MQTT.
+
+### Stop servers
 
 $ make server-stop
 docker-compose down

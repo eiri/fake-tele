@@ -19,7 +19,7 @@ start_link() ->
 init([]) ->
     error_logger:info_msg("~p is up", [?MODULE]),
     _ = crypto:rand_seed(),
-    ClientsNum = rand:uniform(12),
+    ClientsNum = 12,
     gen_server:cast(self(), {start, ClientsNum}),
     {ok, dict:new()}.
 

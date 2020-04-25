@@ -14,6 +14,7 @@
         stdlib,
         crypto,
         sasl,
+        gun,
         emqtt
     ]},
     {mod, {fmqttc, []}}
