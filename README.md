@@ -7,6 +7,8 @@ This is an erlang app that creates a network of MQTT clients reporting randomly 
 
 The propose of the app is to simulate traffic for testing of a MQTT broker.
 
+![Grafana dashboard](grafana.png?raw=true "Temperature graph")
+
 ## Build
 
 ```
@@ -33,7 +35,7 @@ $ make server-logs
 docker-compose logs -f mosquitto
 docker-compose logs -f mosquitto
 Attaching to mosquitto
-mosquitto    | 2020-04-25T18:19:15: mosquitto version 1.6.9 starting
+mosquitto    | 2020-04-25T18:19:15: mosquitto version 1.6.9 starting`
 mosquitto    | 2020-04-25T18:19:15: Config loaded from /mosquitto/config/mosquitto.conf.
 mosquitto    | 2020-04-25T18:19:15: Opening ipv4 listen socket on port 1883.
 mosquitto    | 2020-04-25T18:19:15: Opening ipv6 listen socket on port 1883.
@@ -99,12 +101,15 @@ mosquitto    | 2020-04-25T18:20:09: New client connected from 172.19.0.1 as 82a7
 
 ### Create grafana dashboard
 
-Go to http://localhost:3000. Login as admin:admin. Add data source InfluxDB with name "InfluxDB", url http://influxdb:8086 and database "fake-tele".
+Open http://localhost:3000. Login as `admin:admin`. Add data source `InfluxDB` with name "InfluxDB", `url` http://influxdb:8086 and database "fake-tele".
 
-Go to "Home", choose menu "Import dashboard" and upload or paste json `infra/grafana-dashboard.json`. Go to created dashboard MQTT.
+Go to "Home" (in page header), choose sub-menu "Import dashboard" and upload or paste json from `infra/grafana-dashboard.json`.
+
+Go to created dashboard "MQTT".
 
 ### Stop servers
 
+```
 $ make server-stop
 docker-compose down
 Stopping grafana   ... done
