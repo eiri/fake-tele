@@ -11,10 +11,8 @@
     handle_info/2
 ]).
 
-
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
-
 
 init([]) ->
     error_logger:info_msg("~p is up", [?MODULE]),
@@ -28,27 +26,30 @@ handle_call(_, _, Ctx) ->
 
 handle_cast({start, ClientsNum}, Ctx) ->
     error_logger:info_msg("~p starting ~b clients", [?MODULE, ClientsNum]),
-    NewCtx = lists:foldl(fun(N, Acc) ->
-        Name = name(),
-        Topic = <<"valve/", (integer_to_binary(N))/binary>>,
-        ClientCtx = #{
-            name => Name,
-            topic => Topic,
-            qos => 1,
-            temp => rand:normal(0, 5),
-            interval => 800 + rand:uniform(400),
-            trend => trend()
-        },
-        {ok, Pid} = fmqttc:start_client(ClientCtx),
-        dict:store(Name, ClientCtx#{pid => Pid}, Acc)
-    end, Ctx, lists:seq(1, ClientsNum)),
+    NewCtx = lists:foldl(
+        fun(N, Acc) ->
+            Name = name(),
+            Topic = <<"valve/", (integer_to_binary(N))/binary>>,
+            ClientCtx = #{
+                name => Name,
+                topic => Topic,
+                qos => 1,
+                temp => rand:normal(0, 5),
+                interval => 800 + rand:uniform(400),
+                trend => trend()
+            },
+            {ok, Pid} = fmqttc:start_client(ClientCtx),
+            dict:store(Name, ClientCtx#{pid => Pid}, Acc)
+        end,
+        Ctx,
+        lists:seq(1, ClientsNum)
+    ),
     {noreply, NewCtx};
 handle_cast(_, Ctx) ->
     {stop, unknown_cast, Ctx}.
 
 handle_info(_, Ctx) ->
     {stop, unknown_info, Ctx}.
-
 
 name() ->
     <<I:64>> = crypto:strong_rand_bytes(8),

@@ -12,14 +12,11 @@
     handle_info/2
 ]).
 
-
 -define(DB, "fake-tele").
 -define(C, unicode:characters_to_binary("°")).
 
-
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
-
 
 init([]) ->
     process_flag(trap_exit, true),
@@ -63,8 +60,10 @@ handle_info({publish, #{client_pid := Pid} = Msg}, #{conn := Pid, gun := GunPid}
 handle_info({gun_response, GunPid, _, _, Code, _}, #{gun := GunPid} = Ctx) ->
     case Code > 300 of
         true ->
-            error_logger:error_msg("~b ~s",
-                [Code, httpd_util:reason_phrase(Code)]);
+            error_logger:error_msg(
+                "~b ~s",
+                [Code, httpd_util:reason_phrase(Code)]
+            );
         false ->
             ok
     end,
@@ -84,7 +83,6 @@ terminate(Reason, #{topic := Topic, conn := ConnPid, gun := GunPid}) ->
     {ok, _Props, _ReasonCode} = emqtt:unsubscribe(ConnPid, Topic),
     ok = emqtt:disconnect(ConnPid),
     ok.
-
 
 %% influx API
 
@@ -118,8 +116,10 @@ store_point(Gun, Db, Point) ->
         temp := Temp,
         time := TS
     } = Point,
-    P = io_lib:format("device,topic=~s,type=~s,num=~b temperature=~f ~b",
-        [Topic, Type, Num, Temp, TS]),
+    P = io_lib:format(
+        "device,topic=~s,type=~s,num=~b temperature=~f ~b",
+        [Topic, Type, Num, Temp, TS]
+    ),
     Query = iolist_to_binary(P),
     error_logger:info_msg("~p store point ~s", [?MODULE, Query]),
     Path = "/write?db=" ++ Db ++ "&precision=ms",
