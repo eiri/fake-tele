@@ -12,12 +12,10 @@
 %% supervisor callbacks
 -export([start_link/0, init/1]).
 
-
 %% Public API
 
 start_client(#{} = Ctx) ->
     fmqttc_client_sup:start_child(Ctx).
-
 
 %% application callbacks
 
@@ -26,7 +24,6 @@ start(_Type, _StartArgs) ->
 
 stop(_State) ->
     ok.
-
 
 %% supervisor callbacks
 

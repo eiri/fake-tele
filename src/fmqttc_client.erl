@@ -12,10 +12,8 @@
     handle_info/2
 ]).
 
-
 start_link(Ctx) ->
     gen_server:start_link(?MODULE, [Ctx], []).
-
 
 init([#{name := Name} = Ctx]) ->
     process_flag(trap_exit, true),
@@ -55,9 +53,11 @@ handle_info({puback, PubAck}, #{name := Name, interval := Int} = Ctx) ->
             {noreply, Ctx, Int};
         false ->
             error_logger:error_msg(
-                "Client ~s got invalid ack ~p", [Name, PubAck]),
+                "Client ~s got invalid ack ~p",
+                [Name, PubAck]
+            ),
             {stop, invalid_ack, Ctx}
-        end.
+    end.
 
 terminate(Reason, #{name := Name, conn := ConnPid}) ->
     error_logger:info_msg("~s ~s is down: ~p", [?MODULE, Name, Reason]),

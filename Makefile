@@ -5,6 +5,10 @@ PROJECT := fmqttc
 .PHONY: all
 all: build
 
+.PHONY: format
+format:
+	rebar3 fmt
+
 .PHONY: build
 build:
 	rebar3 compile

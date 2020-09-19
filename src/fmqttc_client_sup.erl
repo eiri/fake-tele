@@ -4,7 +4,6 @@
 
 -export([start_link/0, start_child/1, stop_child/1, init/1]).
 
-
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
