@@ -2,6 +2,8 @@
 
 -behaviour(gen_server).
 
+-include_lib("kernel/include/logger.hrl").
+
 -export([start_link/0]).
 
 -export([
@@ -20,7 +22,7 @@ start_link() ->
 
 init([]) ->
     process_flag(trap_exit, true),
-    error_logger:info_msg("~s is up", [?MODULE]),
+    ?LOG_INFO(#{app => fmqttc, name => ?MODULE, status => up}),
     Ctx = #{
         name => <<"monitor">>,
         topic => <<"valve/#">>,
@@ -45,7 +47,12 @@ handle_cast(subscribe, Ctx) ->
     drop_db(GunPid, ?DB),
     create_db(GunPid, ?DB),
     %% subscribe to mosquitto
-    error_logger:info_msg("~p subscribe to ~s", [?MODULE, Topic]),
+    ?LOG_INFO(#{
+        app => fmqttc,
+        name => ?MODULE,
+        op => subscribe,
+        topic => Topic
+    }),
     {ok, ConnPid} = emqtt:start_link([{clientid, Name}]),
     {ok, _Props} = emqtt:connect(ConnPid),
     {ok, _Props1, _ReasonCodes} = emqtt:subscribe(ConnPid, {Topic, QoS}),
@@ -54,31 +61,39 @@ handle_cast(subscribe, Ctx) ->
 handle_info({publish, #{client_pid := Pid} = Msg}, #{conn := Pid, gun := GunPid} = Ctx) ->
     %% store data in influx db
     #{topic := Topic, temp := Temp} = Point = make_point(Msg),
-    error_logger:info_msg("~s temp ~.2f~ts", [Topic, Temp, ?C]),
+    ?LOG_INFO(#{
+        app => fmqttc,
+        name => ?MODULE,
+        op => received,
+        topic => Topic,
+        temperature => io_lib:format("~.2f~ts", [Temp, ?C])
+    }),
     store_point(GunPid, ?DB, Point),
     {noreply, Ctx};
 handle_info({gun_response, GunPid, _, _, Code, _}, #{gun := GunPid} = Ctx) ->
     case Code > 300 of
         true ->
-            error_logger:error_msg(
-                "~b ~s",
-                [Code, httpd_util:reason_phrase(Code)]
-            );
+            ?LOG_ERROR(#{
+                app => fmqttc,
+                name => ?MODULE,
+                reason => httpd_util:reason_phrase(Code),
+                code => Code
+            });
         false ->
             ok
     end,
     {noreply, Ctx};
-handle_info({gun_data, GunPid, _, _, Data}, #{gun := GunPid} = Ctx) ->
+handle_info({gun_data, GunPid, _, _, _Data}, #{gun := GunPid} = Ctx) ->
     {noreply, Ctx};
 handle_info({gun_up, GunPid, _}, Ctx) ->
-    error_logger:info_msg("~s gun up", [?MODULE]),
+    ?LOG_INFO(#{app => fmqttc, name => gun, status => up}),
     {noreply, Ctx#{gun := GunPid}};
 handle_info({gun_down, GunPid, _, _, _, _}, #{gun := GunPid} = Ctx) ->
-    error_logger:info_msg("~s gun down", [?MODULE]),
+    ?LOG_INFO(#{app => fmqttc, name => down, status => up}),
     {noreply, Ctx#{gun := undefined}}.
 
 terminate(Reason, #{topic := Topic, conn := ConnPid, gun := GunPid}) ->
-    error_logger:info_msg("~s is down: ~p", [?MODULE, Reason]),
+    ?LOG_INFO(#{app => fmqttc, name => ?MODULE, status => down, reason => Reason}),
     ok = gun:close(GunPid),
     {ok, _Props, _ReasonCode} = emqtt:unsubscribe(ConnPid, Topic),
     ok = emqtt:disconnect(ConnPid),
@@ -90,14 +105,14 @@ common_headers() ->
     [{<<"content-type">>, <<"application/x-www-form-urlencoded">>}].
 
 drop_db(Gun, Db) ->
-    error_logger:info_msg("~p drop db ~s", [?MODULE, Db]),
+    ?LOG_INFO(#{app => fmqttc, name => ?MODULE, op => drop_db, db_name => Db}),
     Q = http_uri:encode("DROP DATABASE \"" ++ Db ++ "\""),
     Query = iolist_to_binary(["q=", Q]),
     gun:post(Gun, "/query", common_headers(), Query).
 
 create_db(Gun, Db) ->
-    error_logger:info_msg("~p create db ~s", [?MODULE, Db]),
-    Q = http_uri:encode("CREATE DATABASE \"" ++ ?DB ++ "\""),
+    ?LOG_INFO(#{app => fmqttc, name => ?MODULE, op => create_db, db_name => Db}),
+    Q = http_uri:encode("CREATE DATABASE \"" ++ Db ++ "\""),
     Query = iolist_to_binary(["q=", Q]),
     gun:post(Gun, "/query", common_headers(), Query).
 
@@ -121,6 +136,6 @@ store_point(Gun, Db, Point) ->
         [Topic, Type, Num, Temp, TS]
     ),
     Query = iolist_to_binary(P),
-    error_logger:info_msg("~p store point ~s", [?MODULE, Query]),
+    ?LOG_INFO(#{app => fmqttc, name => ?MODULE, op => store, point => Query}),
     Path = "/write?db=" ++ Db ++ "&precision=ms",
     gun:post(Gun, Path, common_headers(), Query).

@@ -2,6 +2,8 @@
 
 -behaviour(gen_server).
 
+-include_lib("kernel/include/logger.hrl").
+
 -export([start_link/0]).
 
 -export([
@@ -15,7 +17,7 @@ start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
-    error_logger:info_msg("~p is up", [?MODULE]),
+    ?LOG_INFO(#{app => fmqttc, name => ?MODULE, status => up}),
     _ = crypto:rand_seed(),
     ClientsNum = 12,
     gen_server:cast(self(), {start, ClientsNum}),
@@ -25,7 +27,13 @@ handle_call(_, _, Ctx) ->
     {stop, unknown_call, Ctx}.
 
 handle_cast({start, ClientsNum}, Ctx) ->
-    error_logger:info_msg("~p starting ~b clients", [?MODULE, ClientsNum]),
+    ?LOG_INFO(#{
+        app => fmqttc,
+        name => ?MODULE,
+        op => start,
+        message => "starting clients",
+        count => ClientsNum
+    }),
     NewCtx = lists:foldl(
         fun(N, Acc) ->
             Name = name(),
