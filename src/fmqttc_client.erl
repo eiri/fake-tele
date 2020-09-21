@@ -41,11 +41,7 @@ handle_cast(publish, Ctx) ->
         temp := Temp
     } = Ctx,
     Msg = float_to_binary(Temp),
-    ?LOG_INFO(#{
-        op => publish,
-        topic => Topic,
-        temperature => Temp
-    }),
+    ?LOG_INFO(#{op => publish, topic => Topic, temperature => Temp}),
     {ok, PktId} = emqtt:publish(ConnPid, Topic, Msg, QoS),
     {noreply, Ctx#{packet_id := PktId}}.
 
@@ -60,14 +56,11 @@ handle_info({puback, PubAck}, #{interval := Int} = Ctx) ->
         true ->
             {noreply, Ctx, Int};
         false ->
-            ?LOG_ERROR(#{
-                reason => invalid_ack,
-                ack => PubAck
-            }),
+            ?LOG_ERROR(#{reason => invalid_ack, ack => PubAck}),
             {stop, invalid_ack, Ctx}
     end.
 
-terminate(Reason, #{conn := ConnPid}) ->
-    ?LOG_INFO(#{status => down, reason => Reason}),
+terminate(Reason, #{name := Name, conn := ConnPid}) ->
+    ?LOG_INFO(#{name => Name, status => down, reason => Reason}),
     ok = emqtt:disconnect(ConnPid),
     ok.

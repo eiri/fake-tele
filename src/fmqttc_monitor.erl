@@ -67,10 +67,7 @@ handle_info({publish, #{client_pid := Pid} = Msg}, #{conn := Pid, gun := GunPid}
 handle_info({gun_response, GunPid, _, _, Code, _}, #{gun := GunPid} = Ctx) ->
     case Code > 300 of
         true ->
-            ?LOG_ERROR(#{
-                reason => httpd_util:reason_phrase(Code),
-                code => Code
-            });
+            ?LOG_ERROR(#{reason => httpd_util:reason_phrase(Code), code => Code});
         false ->
             ok
     end,

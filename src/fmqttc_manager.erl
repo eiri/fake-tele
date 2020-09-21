@@ -28,11 +28,7 @@ handle_call(_, _, Ctx) ->
     {stop, unknown_call, Ctx}.
 
 handle_cast({start, ClientsNum}, Ctx) ->
-    ?LOG_INFO(#{
-        op => start,
-        msg => "starting clients",
-        count => ClientsNum
-    }),
+    ?LOG_INFO(#{op => start, msg => "starting clients", count => ClientsNum}),
     NewCtx = lists:foldl(
         fun(N, Acc) ->
             Name = name(),
