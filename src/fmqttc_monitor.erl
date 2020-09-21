@@ -22,7 +22,8 @@ start_link() ->
 
 init([]) ->
     process_flag(trap_exit, true),
-    ?LOG_INFO(#{app => fmqttc, name => ?MODULE, status => up}),
+    logger:set_process_metadata(#{domain => [fmqttc], module => ?MODULE, role => monitor}),
+    ?LOG_INFO(#{status => up}),
     Ctx = #{
         name => <<"monitor">>,
         topic => <<"valve/#">>,
@@ -47,12 +48,7 @@ handle_cast(subscribe, Ctx) ->
     drop_db(GunPid, ?DB),
     create_db(GunPid, ?DB),
     %% subscribe to mosquitto
-    ?LOG_INFO(#{
-        app => fmqttc,
-        name => ?MODULE,
-        op => subscribe,
-        topic => Topic
-    }),
+    ?LOG_INFO(#{op => subscribe, topic => Topic}),
     {ok, ConnPid} = emqtt:start_link([{clientid, Name}]),
     {ok, _Props} = emqtt:connect(ConnPid),
     {ok, _Props1, _ReasonCodes} = emqtt:subscribe(ConnPid, {Topic, QoS}),
@@ -62,8 +58,6 @@ handle_info({publish, #{client_pid := Pid} = Msg}, #{conn := Pid, gun := GunPid}
     %% store data in influx db
     #{topic := Topic, temp := Temp} = Point = make_point(Msg),
     ?LOG_INFO(#{
-        app => fmqttc,
-        name => ?MODULE,
         op => received,
         topic => Topic,
         temperature => io_lib:format("~.2f~ts", [Temp, ?C])
@@ -74,8 +68,6 @@ handle_info({gun_response, GunPid, _, _, Code, _}, #{gun := GunPid} = Ctx) ->
     case Code > 300 of
         true ->
             ?LOG_ERROR(#{
-                app => fmqttc,
-                name => ?MODULE,
                 reason => httpd_util:reason_phrase(Code),
                 code => Code
             });
@@ -86,14 +78,14 @@ handle_info({gun_response, GunPid, _, _, Code, _}, #{gun := GunPid} = Ctx) ->
 handle_info({gun_data, GunPid, _, _, _Data}, #{gun := GunPid} = Ctx) ->
     {noreply, Ctx};
 handle_info({gun_up, GunPid, _}, Ctx) ->
-    ?LOG_INFO(#{app => fmqttc, name => gun, status => up}),
+    ?LOG_INFO(#{name => gun, status => up}),
     {noreply, Ctx#{gun := GunPid}};
 handle_info({gun_down, GunPid, _, _, _, _}, #{gun := GunPid} = Ctx) ->
-    ?LOG_INFO(#{app => fmqttc, name => down, status => up}),
+    ?LOG_INFO(#{name => gun, status => down}),
     {noreply, Ctx#{gun := undefined}}.
 
 terminate(Reason, #{topic := Topic, conn := ConnPid, gun := GunPid}) ->
-    ?LOG_INFO(#{app => fmqttc, name => ?MODULE, status => down, reason => Reason}),
+    ?LOG_INFO(#{status => down, reason => Reason}),
     ok = gun:close(GunPid),
     {ok, _Props, _ReasonCode} = emqtt:unsubscribe(ConnPid, Topic),
     ok = emqtt:disconnect(ConnPid),
@@ -105,13 +97,13 @@ common_headers() ->
     [{<<"content-type">>, <<"application/x-www-form-urlencoded">>}].
 
 drop_db(Gun, Db) ->
-    ?LOG_INFO(#{app => fmqttc, name => ?MODULE, op => drop_db, db_name => Db}),
+    ?LOG_INFO(#{op => drop_db, db_name => Db}),
     Q = http_uri:encode("DROP DATABASE \"" ++ Db ++ "\""),
     Query = iolist_to_binary(["q=", Q]),
     gun:post(Gun, "/query", common_headers(), Query).
 
 create_db(Gun, Db) ->
-    ?LOG_INFO(#{app => fmqttc, name => ?MODULE, op => create_db, db_name => Db}),
+    ?LOG_INFO(#{op => create_db, db_name => Db}),
     Q = http_uri:encode("CREATE DATABASE \"" ++ Db ++ "\""),
     Query = iolist_to_binary(["q=", Q]),
     gun:post(Gun, "/query", common_headers(), Query).
@@ -136,6 +128,6 @@ store_point(Gun, Db, Point) ->
         [Topic, Type, Num, Temp, TS]
     ),
     Query = iolist_to_binary(P),
-    ?LOG_INFO(#{app => fmqttc, name => ?MODULE, op => store, point => Query}),
+    ?LOG_INFO(#{op => store, point => Query}),
     Path = "/write?db=" ++ Db ++ "&precision=ms",
     gun:post(Gun, Path, common_headers(), Query).

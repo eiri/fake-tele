@@ -17,7 +17,8 @@ start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
-    ?LOG_INFO(#{app => fmqttc, name => ?MODULE, status => up}),
+    logger:set_process_metadata(#{domain => [fmqttc], module => ?MODULE, role => manager}),
+    ?LOG_INFO(#{status => up}),
     _ = crypto:rand_seed(),
     ClientsNum = 12,
     gen_server:cast(self(), {start, ClientsNum}),
@@ -28,10 +29,8 @@ handle_call(_, _, Ctx) ->
 
 handle_cast({start, ClientsNum}, Ctx) ->
     ?LOG_INFO(#{
-        app => fmqttc,
-        name => ?MODULE,
         op => start,
-        message => "starting clients",
+        msg => "starting clients",
         count => ClientsNum
     }),
     NewCtx = lists:foldl(
