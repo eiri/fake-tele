@@ -10,12 +10,12 @@ format:
 	rebar3 fmt
 
 .PHONY: build
-build:
+build: format
 	rebar3 compile
 
 .PHONY: run
 run:
-	rebar3 shell --apps=$(PROJECT)
+	rebar3 shell
 
 .PHONY: server-start
 server-start:

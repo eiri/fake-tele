@@ -2,6 +2,8 @@
 
 -behaviour(gen_server).
 
+-include_lib("kernel/include/logger.hrl").
+
 -export([start_link/1]).
 
 -export([
@@ -17,7 +19,8 @@ start_link(Ctx) ->
 
 init([#{name := Name} = Ctx]) ->
     process_flag(trap_exit, true),
-    error_logger:info_msg("~s ~s is up", [?MODULE, Name]),
+    logger:set_process_metadata(#{domain => [fmqttc], module => ?MODULE, role => client}),
+    ?LOG_INFO(#{name => Name, status => up}),
     _ = crypto:rand_seed(),
     gen_server:cast(self(), start),
     {ok, Ctx}.
@@ -38,6 +41,7 @@ handle_cast(publish, Ctx) ->
         temp := Temp
     } = Ctx,
     Msg = float_to_binary(Temp),
+    ?LOG_INFO(#{op => publish, topic => Topic, temperature => Temp}),
     {ok, PktId} = emqtt:publish(ConnPid, Topic, Msg, QoS),
     {noreply, Ctx#{packet_id := PktId}}.
 
@@ -45,21 +49,18 @@ handle_info(timeout, #{temp := Temp0, trend := T} = Ctx) ->
     {ok, Temp} = T(Temp0),
     gen_server:cast(self(), publish),
     {noreply, Ctx#{temp := Temp}};
-handle_info({puback, PubAck}, #{name := Name, interval := Int} = Ctx) ->
+handle_info({puback, PubAck}, #{interval := Int} = Ctx) ->
     #{packet_id := PktId0} = PubAck,
     #{packet_id := PktId} = Ctx,
     case PktId0 =:= PktId of
         true ->
             {noreply, Ctx, Int};
         false ->
-            error_logger:error_msg(
-                "Client ~s got invalid ack ~p",
-                [Name, PubAck]
-            ),
+            ?LOG_ERROR(#{reason => invalid_ack, ack => PubAck}),
             {stop, invalid_ack, Ctx}
     end.
 
 terminate(Reason, #{name := Name, conn := ConnPid}) ->
-    error_logger:info_msg("~s ~s is down: ~p", [?MODULE, Name, Reason]),
+    ?LOG_INFO(#{name => Name, status => down, reason => Reason}),
     ok = emqtt:disconnect(ConnPid),
     ok.
