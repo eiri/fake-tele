@@ -45,16 +45,16 @@ handle_cast(publish, Ctx) ->
     {ok, PktId} = emqtt:publish(ConnPid, Topic, Msg, QoS),
     {noreply, Ctx#{packet_id := PktId}}.
 
-handle_info(timeout, #{temp := Temp0, trend := T} = Ctx) ->
-    {ok, Temp} = T(Temp0),
+handle_info(timeout, #{temp := Temp0, trend := Trend} = Ctx) ->
+    {ok, Temp} = Trend(Temp0),
     gen_server:cast(self(), publish),
     {noreply, Ctx#{temp := Temp}};
-handle_info({puback, PubAck}, #{interval := Int} = Ctx) ->
+handle_info({puback, PubAck}, #{interval := Timeout} = Ctx) ->
     #{packet_id := PktId0} = PubAck,
     #{packet_id := PktId} = Ctx,
     case PktId0 =:= PktId of
         true ->
-            {noreply, Ctx, Int};
+            {noreply, Ctx, Timeout};
         false ->
             ?LOG_ERROR(#{reason => invalid_ack, ack => PubAck}),
             {stop, invalid_ack, Ctx}

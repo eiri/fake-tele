@@ -37,7 +37,7 @@ handle_cast({start, ClientsNum}, Ctx) ->
                 name => Name,
                 topic => Topic,
                 qos => 1,
-                temp => rand:normal(0, 5),
+                temp => (rand:uniform(10) - 5) * 1.0,
                 interval => 800 + rand:uniform(400),
                 trend => trend()
             },
@@ -59,8 +59,20 @@ name() ->
     iolist_to_binary(io_lib:format("~.16b", [I])).
 
 trend() ->
-    trend(random).
+    trend(time).
 
+trend(time) ->
+    fun(T) ->
+        Delta = max(rand:normal(0, 1), 0),
+        case calendar:now_to_local_time(os:timestamp()) of
+            {_, {_, _, Secs}} when Secs >= 30, T < 5.0 ->
+                {ok, T + Delta};
+            _ when T > -5.0 ->
+                {ok, T - Delta};
+            _ ->
+                {ok, T + Delta}
+        end
+    end;
 trend(random) ->
     fun(T) ->
         {ok, rand:normal(T, 1)}
