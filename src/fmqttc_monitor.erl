@@ -26,7 +26,7 @@ init([]) ->
     ?LOG_INFO(#{status => up}),
     Ctx = #{
         name => <<"monitor">>,
-        topic => <<"valve/#">>,
+        topic => <<"valve/+/temperature">>,
         qos => 1
     },
     gen_server:cast(self(), subscribe),
@@ -106,23 +106,22 @@ create_db(Gun, Db) ->
     gun:post(Gun, "/query", common_headers(), Query).
 
 make_point(#{topic := Topic, payload := Payload}) ->
-    [Type, Num0] = binary:split(Topic, <<"/">>),
-    Num = binary_to_integer(Num0),
+    [Type, Name, _] = binary:split(Topic, <<"/">>, [global]),
     Temp = binary_to_float(Payload),
     TS = os:system_time(millisecond),
-    #{topic => Topic, type => Type, num => Num, temp => Temp, time => TS}.
+    #{topic => Topic, type => Type, name => Name, temp => Temp, time => TS}.
 
 store_point(Gun, Db, Point) ->
     #{
         topic := Topic,
         type := Type,
-        num := Num,
+        name := Name,
         temp := Temp,
         time := TS
     } = Point,
     P = io_lib:format(
-        "device,topic=~s,type=~s,num=~b temperature=~f ~b",
-        [Topic, Type, Num, Temp, TS]
+        "device,topic=~s,type=~s,name=~s temperature=~f ~b",
+        [Topic, Type, Name, Temp, TS]
     ),
     Query = iolist_to_binary(P),
     ?LOG_INFO(#{op => store, point => Query}),

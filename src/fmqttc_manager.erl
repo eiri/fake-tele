@@ -30,9 +30,9 @@ handle_call(_, _, Ctx) ->
 handle_cast({start, ClientsNum}, Ctx) ->
     ?LOG_INFO(#{op => start, msg => "starting clients", count => ClientsNum}),
     NewCtx = lists:foldl(
-        fun(N, Acc) ->
+        fun(_, Acc) ->
             Name = name(),
-            Topic = <<"valve/", (integer_to_binary(N))/binary>>,
+            Topic = <<"valve/", Name/binary, "/temperature">>,
             ClientCtx = #{
                 name => Name,
                 topic => Topic,
