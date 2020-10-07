@@ -1,6 +1,8 @@
 # Fake tele
 _A fake telemetry MQTT client_
 
+![test](https://github.com/eiri/fake-tele/workflows/test/badge.svg)
+
 ## Description and motivation
 
 This is an erlang app that creates a network of MQTT clients reporting randomly generated telemetry to a broker.
