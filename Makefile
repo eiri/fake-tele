@@ -3,7 +3,7 @@
 PROJECT := fmqttc
 
 .PHONY: all
-all: build
+all: build test
 
 .PHONY: format
 format:
@@ -12,6 +12,10 @@ format:
 .PHONY: build
 build: format
 	rebar3 compile
+
+.PHONY: test
+test:
+	rebar3 eunit
 
 .PHONY: run
 run:
