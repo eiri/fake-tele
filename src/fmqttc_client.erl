@@ -31,6 +31,7 @@ callback_mode() ->
 ready(cast, connect, #{name := Name} = Ctx) ->
     {ok, ConnPid} = emqtt:start_link([{clientid, Name}]),
     {ok, _Props} = emqtt:connect(ConnPid),
+    ?LOG_INFO(#{op => connect, client_pid => ConnPid}),
     gen_statem:cast(self(), publish),
     {next_state, ready, Ctx#{conn => ConnPid, packet_id => 0}};
 ready(cast, publish, Ctx) ->
@@ -41,11 +42,12 @@ ready(cast, publish, Ctx) ->
         temp := Temp
     } = Ctx,
     Msg = float_to_binary(Temp),
-    ?LOG_INFO(#{op => publish, topic => Topic, temperature => Temp}),
+    ?LOG_INFO(#{op => publish, topic => Topic, msg => Msg}),
     {ok, PktId} = emqtt:publish(ConnPid, Topic, Msg, QoS),
     {next_state, waiting_ack, Ctx#{packet_id := PktId}};
 ready(state_timeout, measure, #{temp := Temp0, trend := Trend} = Ctx) ->
     {ok, Temp} = Trend(Temp0),
+    ?LOG_INFO(#{op => measure, temperature => Temp}),
     gen_statem:cast(self(), publish),
     {next_state, ready, Ctx#{temp := Temp}}.
 
