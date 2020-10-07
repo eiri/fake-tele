@@ -49,16 +49,15 @@ ready(state_timeout, measure, #{temp := Temp0, trend := Trend} = Ctx) ->
     gen_statem:cast(self(), publish),
     {next_state, ready, Ctx#{temp := Temp}}.
 
-waiting_ack(info, {puback, PubAck}, #{interval := Timeout} = Ctx) ->
-    #{packet_id := PktId0} = PubAck,
-    #{packet_id := PktId} = Ctx,
-    case PktId0 =:= PktId of
-        true ->
-            {next_state, ready, Ctx, [{state_timeout, Timeout, measure}]};
-        false ->
-            ?LOG_ERROR(#{reason => invalid_ack, ack => PubAck}),
-            {stop, invalid_ack, Ctx}
-    end.
+waiting_ack(
+    info,
+    {puback, #{packet_id := PktId}},
+    #{packet_id := PktId, interval := Timeout} = Ctx
+) ->
+    {next_state, ready, Ctx, [{state_timeout, Timeout, measure}]};
+waiting_ack(info, {puback, PubAck}, Ctx) ->
+    ?LOG_ERROR(#{reason => invalid_ack, ack => PubAck}),
+    {stop, invalid_ack, Ctx}.
 
 terminate(Reason, _State, #{name := Name, conn := ConnPid}) ->
     ?LOG_INFO(#{name => Name, status => down, reason => Reason}),
