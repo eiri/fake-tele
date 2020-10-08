@@ -14,7 +14,7 @@ ready_test_() ->
             meck:expect(emqtt, connect, 1, {ok, []}),
             meck:expect(emqtt, publish, 4, {ok, 1}),
             {ok, #{
-                name => <<"name">>,
+                uid => <<"abcdefgh">>,
                 topic => <<"topic">>,
                 qos => 1,
                 conn => Pid,
