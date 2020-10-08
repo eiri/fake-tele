@@ -17,10 +17,10 @@
 start_link(Ctx) ->
     gen_statem:start_link(?MODULE, [Ctx], []).
 
-init([#{name := Name} = Ctx]) ->
+init([#{uid := UID} = Ctx]) ->
     process_flag(trap_exit, true),
     logger:set_process_metadata(#{domain => [fmqttc], module => ?MODULE, role => client}),
-    ?LOG_INFO(#{name => Name, status => up}),
+    ?LOG_INFO(#{uid => UID, status => up}),
     _ = crypto:rand_seed(),
     gen_statem:cast(self(), connect),
     {ok, ready, Ctx}.
@@ -28,8 +28,8 @@ init([#{name := Name} = Ctx]) ->
 callback_mode() ->
     state_functions.
 
-ready(cast, connect, #{name := Name} = Ctx) ->
-    {ok, ConnPid} = emqtt:start_link([{clientid, Name}]),
+ready(cast, connect, #{uid := UID} = Ctx) ->
+    {ok, ConnPid} = emqtt:start_link([{clientid, UID}]),
     {ok, _Props} = emqtt:connect(ConnPid),
     ?LOG_INFO(#{op => connect, client_pid => ConnPid}),
     gen_statem:cast(self(), publish),
@@ -61,7 +61,7 @@ waiting_ack(info, {puback, PubAck}, Ctx) ->
     ?LOG_ERROR(#{reason => invalid_ack, ack => PubAck}),
     {stop, invalid_ack, Ctx}.
 
-terminate(Reason, _State, #{name := Name, conn := ConnPid}) ->
-    ?LOG_INFO(#{name => Name, status => down, reason => Reason}),
+terminate(Reason, _State, #{uid := UID, conn := ConnPid}) ->
+    ?LOG_INFO(#{uid => UID, status => down, reason => Reason}),
     ok = emqtt:disconnect(ConnPid),
     ok.

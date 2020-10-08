@@ -20,7 +20,7 @@ init([]) ->
     logger:set_process_metadata(#{domain => [fmqttc], module => ?MODULE, role => manager}),
     ?LOG_INFO(#{status => up}),
     _ = crypto:rand_seed(),
-    ClientsNum = 12,
+    ClientsNum = 3,
     gen_server:cast(self(), {start, ClientsNum}),
     {ok, dict:new()}.
 
@@ -30,11 +30,12 @@ handle_call(_, _, Ctx) ->
 handle_cast({start, ClientsNum}, Ctx) ->
     ?LOG_INFO(#{op => start, msg => "starting clients", count => ClientsNum}),
     NewCtx = lists:foldl(
-        fun(_, Acc) ->
-            Name = name(),
+        fun(I, Acc) ->
+            UID = uid(),
+            Name = iolist_to_binary(io_lib:format("room-~b", [I])),
             Topic = <<"valve/", Name/binary, "/temperature">>,
             ClientCtx = #{
-                name => Name,
+                uid => UID,
                 topic => Topic,
                 qos => 1,
                 temp => (rand:uniform(10) - 5) * 1.0,
@@ -42,7 +43,7 @@ handle_cast({start, ClientsNum}, Ctx) ->
                 trend => trend()
             },
             {ok, Pid} = fmqttc:start_client(ClientCtx),
-            dict:store(Name, ClientCtx#{pid => Pid}, Acc)
+            dict:store(UID, ClientCtx#{pid => Pid}, Acc)
         end,
         Ctx,
         lists:seq(1, ClientsNum)
@@ -54,7 +55,7 @@ handle_cast(_, Ctx) ->
 handle_info(_, Ctx) ->
     {stop, unknown_info, Ctx}.
 
-name() ->
+uid() ->
     <<I:64>> = crypto:strong_rand_bytes(8),
     iolist_to_binary(io_lib:format("~.16b", [I])).
 
